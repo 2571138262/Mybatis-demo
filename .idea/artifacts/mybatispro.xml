@@ -1,0 +1,6 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="mybatispro">
+    <output-path>$PROJECT_DIR$/out/artifacts/mybatispro</output-path>
+    <root id="root" />
+  </artifact>
+</component>

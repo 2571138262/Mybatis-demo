@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+mapper  用于定义一个映射配置文件的根节点
+namespace   属性是用来配置当前的命名空间的，主要进行session级别的缓存管理
+            命名空间默认情况下使用我们当前操作的实体类全路径
+-->
+<mapper namespace="com.damu.entity.Users">
+    <!--查询全部用户信息--><!-- 动态sql语句-->
+    <!--<select id="findUsers" resultType="com.damu.entity.Users">-->
+    <!--// 这里参数为什么是new Users(id)-->
+    <!--// 因为在映射配置文件中命名空间对象的实体类是Users，动态SQL语句中的 #{id} 参数id是从Users对象中找的，-->
+    <!--// 所以需要通过id来实例化一个User的对象，这样才能找到对应的id值-->
+    <select id="findUsers" resultMap="forUsers">
+        select * from user
+        <if test="id != null">
+            where id = #{id}
+        </if>
+    </select>
+
+    <!--自定义映射关系集合：主要包含一些自定义操作的配置， 如不一致的属性和字段       resultMap 和 resultType只能同时出现一个-->
+    <resultMap id="forUsers" type="com.damu.entity.Users">
+        <!--绑定id主键-->
+        <id property="id" column="id"></id>
+
+        <!--<id column="" property=""></id>-->
+        <!--result配置，主要是配置普通属性， column表示配置的是数据库字段名称 priperty配饰的是实体类的属性名称-->
+        <result column="username" property="name"></result>
+
+        <collection property="addresses" column="id" ofType="com.damu.entity.Address" select="getAddress"></collection>
+    </resultMap>
+    <!--多表关联-->
+    <select id="getAddress" resultType="com.damu.entity.Address">
+        select * from address where userid = #{id}
+    </select>
+
+    <!--根据Id来查询用户信息            #{} 接收参数-->
+    <!--<select id="findById" resultType="com.damu.entity.Users">-->
+        <!--select * from user where id = #{id}-->
+    <!--</select>-->
+
+    <!--SQL片段-->
+    <sql id="user_fields">
+          username, userpass, nickname, age, gender, email, phone, createTime, updateTime, lastLogin, userstatus, remark
+    </sql>
+
+    <!-- useGenerateKeys="true" 使用自动增长键(主键)   keyProperty="id"  将自动增长的值赋给Users对象的id属性-->
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="id">
+        insert into user( <include refid="user_fields"></include>)
+        values(#{name}, #{userpass}, #{nickname}, #{age}, #{gender}, #{email}, #{phone}, #{createTime}, #{updateTime}, #{lastLogin}, #{userStatus}, #{remark})
+    </insert>
+    
+    <update id="updateUser">
+        update user
+        <set>
+            <if test="name != null">username = #{name},</if>
+            <if test="userpass != null">userpass = #{userpass},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="createTime != null">createTime = #{createTime},</if>
+            <if test="updateTime != null">updateTime = #{updateTime},</if>
+            <if test="lastLogin != null">lastLogin = #{lastLogin},</if>
+            <if test="userStatus != null">userStatus = #{userStatus},</if>
+            <if test="remark != null">remark = #{remark}</if>
+        </set>
+        where id = #{id}
+    </update>
+    
+    <delete id="delUser">
+        delete from user where id = #{id}
+    </delete>
+</mapper>
